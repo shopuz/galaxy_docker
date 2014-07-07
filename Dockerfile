@@ -1,10 +1,10 @@
-# Galaxy - ChemicalToolBox
+# Galaxy
 #
 # VERSION       0.1
 
 FROM debian:wheezy
 
-MAINTAINER Björn A. Grüning, bjoern.gruening@gmail.com
+MAINTAINER Suren Shrestha, shopuz@gmail.com
 
 # make sure the package repository is up to date
 RUN DEBIAN_FRONTEND=noninteractive apt-get -qq update
@@ -48,14 +48,14 @@ RUN a2enmod proxy_http
 RUN a2enmod rewrite
 
 # Download and update Galaxy to the latest stable release
-# RUN hg clone https://bitbucket.org/galaxy/galaxy-central/
-Add . /
+RUN hg clone https://bitbucket.org/galaxy/galaxy-central/
+#Add . /
 WORKDIR /galaxy-central
-# RUN hg pull
-# RUN hg update stable
+RUN hg pull
+RUN hg update stable
 
 # Configure Galaxy to use the Tool Shed
-RUN cp ~/galaxy-central/universe_wsgi.ini.sample ~/galaxy-central/universe_wsgi.ini
+Add ./universe_wsgi.ini /galaxy-central/universe_wsgi.ini
 RUN mkdir ~/shed_tools
 RUN mkdir ~/galaxy-central/tool_deps
 
@@ -86,6 +86,9 @@ ADD ./startup.sh /usr/bin/startup
 RUN chmod +x /usr/bin/startup
 RUN cp /tmp/ctb.apache /etc/apache2/sites-available/
 
+
+
+
 RUN a2ensite ctb.apache
 RUN service apache2 restart
 RUN service postgresql stop
@@ -100,6 +103,7 @@ RUN python setup_postgresql.py --dbuser galaxy --dbpassword galaxy --db-name gal
 RUN service postgresql start && sh create_db.sh
 RUN service postgresql start && sleep 5 && python create_galaxy_user.py --user admin@galaxy.org --password admin --key admin
 RUN service postgresql start && sh run.sh --daemon && sleep 120
+
 
 
 # Mark one folders as imported from the host.
